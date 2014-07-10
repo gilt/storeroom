@@ -1,12 +1,16 @@
 name := "storeroom"
 
-organization := "com.gilt"
+organization in ThisBuild := "com.gilt"
 
 scalaVersion in ThisBuild := "2.10.4"
 
 crossScalaVersions := Seq("2.10.4", "2.11.1")
 
 version in ThisBuild := "0.0.1"
+
+homepage in ThisBuild := Some(url("http://github.com/gilt/storeroom"))
+
+licenses in GlobalScope += "MIT" -> url("https://github.com/gilt/storeroom/raw/master/LICENSE")
 
 lazy val root = (project in file("."))
   .aggregate(core, dynamodb)
