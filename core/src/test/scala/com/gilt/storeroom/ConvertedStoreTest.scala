@@ -34,6 +34,28 @@ class ConvertedStoreTest extends FunSuite with Matchers with ScalaFutures with M
     verify(underlying).put(1->Some(1))
   }
 
+  test("multiGets are converted") {
+    val underlying = mock[Store[Int,Int]]
+    when(underlying.multiGet(Set(1,2))).thenReturn(Map(1 -> Future.successful(Some(2)), 2 -> Future.successful(None)))
+
+    val store = new ConvertedStore(underlying)(_+1)(_-1)
+
+    Future.sequence(store.multiGet(Set(1,2)).map {
+      case (k,v) => v.map(k->_)
+    }).futureValue.toMap should be(Map(1 -> Some(3), 2 -> None))
+  }
+
+  test("multiPuts are converted") {
+    val underlying = mock[Store[Int,Int]]
+    when(underlying.multiPut(Map(1 -> Some(1), 2 -> None))).thenReturn(Map(1 -> Future.successful(()), 2 -> Future.successful(())))
+
+    val store = new ConvertedStore(underlying)(_+1)(_-1)
+
+    store.multiPut(Map(1->Some(2), 2 -> None)).mapValues(_.futureValue)
+
+    verify(underlying).multiPut(Map(1 -> Some(1), 2 -> None))
+  }
+
   test("close is passed through") {
     val underlying = mock[Store[Int,Int]]
     when(underlying.close()).thenReturn(Future.successful(()))

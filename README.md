@@ -6,19 +6,19 @@ Storeroom is a general interface to key-value stores.  It is inspired by Twitter
 
 The primary abstractions are ReadableStore, WriteableStore, and the combined read-write Store:
 
-    trait ReadableStore[-K, +V] extends Closeable {
+    trait ReadableStore[K, +V] extends Closeable {
       def get(k: K): Future[Option[V]]
-      def multiGet[K1 <: K](ks: Set[K1]): Map[K1, Future[Option[V]]]
+      def multiGet[K](ks: Set[K]): Map[K, Future[Option[V]]]
       def close()
     }
 
-    trait WritableStore[-K, -V] extends Closeable {
+    trait WritableStore[K, -V] extends Closeable {
       def put(kv: (K, V)): Future[Unit]
-      def multiPut[K1 <: K](kvs: Map[K1, V]): Map[K1, Future[Unit]]
+      def multiPut[K](kvs: Map[K, V]): Map[K, Future[Unit]]
       def close()
     }
 
-    trait Store[-K, V] extends ReadableStore[K, V] with WritableStore[K, Option[V]]
+    trait Store[K, V] extends ReadableStore[K, V] with WritableStore[K, Option[V]]
 
 For backing stores which support it, it's also possible to iterate over all the entries in the store:
 
