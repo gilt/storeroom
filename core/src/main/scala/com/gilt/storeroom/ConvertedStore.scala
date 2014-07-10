@@ -5,6 +5,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import TupleOps._
 
+/**
+  * ConvertedStore allows a Store to be wrapped via a pair of conversion
+  * functions changing the type of the stored values.
+  */
 class ConvertedStore[K, V1, V2](s: Store[K, V1])(to: V1 => V2)(from: V2 => V1)
     extends Store[K,V2] {
 

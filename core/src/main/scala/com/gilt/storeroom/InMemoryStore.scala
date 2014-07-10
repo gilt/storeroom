@@ -4,6 +4,12 @@ import scala.concurrent._
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
+/**
+  * An in-memory Store implementation.  Generally this should
+  * only be used for testing or as a cache, since there is no
+  * persistence of data once the process terminates.
+  */
+
 class InMemoryStore[K,V] extends IterableStore[K,V] {
   import collection.concurrent.Map
 

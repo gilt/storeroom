@@ -14,11 +14,28 @@ import com.amazonaws.services.dynamodbv2.model._
 
 object DynamoStore {
 
+  /**
+    * Create a Store for the specified table, primary key, and value column in Dynamo.
+    * This assumes your AWS credentials are available in the environment, as described
+    * in the AWS SDK documentation.
+    *
+    * Asynchronous operations are executed in a thread pool sized according to the
+    * number of available processors
+    *
+    * @see <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()">SDK Javadoc</a>
+    */
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStore = {
     val processors = Runtime.getRuntime.availableProcessors
     this(tableName, primaryKeyColumn, valueColumn, processors)
   }
 
+  /**
+    * Create a Store for the specified table, primary key, and value column in Dynamo.
+    * This assumes your AWS credentials are available in the environment, as described
+    * in the AWS SDK documentation.
+    *
+    * @see <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()">SDK Javadoc</a>
+    */
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoStore = {
     val client = new AmazonDynamoDBClient()
     new DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads)
@@ -65,6 +82,9 @@ class DynamoStore(val client: AmazonDynamoDB, val tableName: String,
       Option(client.getItem(getRequest).getItem).map(_.get(valueColumn))
     }
   }
+
+  // TODO - implement multiGet and multiPut
+
 
   override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Future[List[(String, AttributeValue)]] = {
     val attributes = List(primaryKeyColumn, valueColumn)
