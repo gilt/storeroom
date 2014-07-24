@@ -55,9 +55,7 @@ trait IterableStoreTest extends StoreTest {
       case (k,v) => v.map(k->_)
     }).futureValue
 
-    whenReady(store.getAll()) { found =>
-      found should contain theSameElementsAs items.toList
-    }
+    enumeratorValue(store.getAll()) should contain theSameElementsAs items.toList
   }
 
 }

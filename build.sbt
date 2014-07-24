@@ -14,6 +14,8 @@ homepage in ThisBuild := Some(url("http://github.com/gilt/storeroom"))
 
 licenses in GlobalScope += "MIT" -> url("https://github.com/gilt/storeroom/raw/master/LICENSE")
 
+resolvers in ThisBuild += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+
 lazy val root = (project in file("."))
   .aggregate(core, dynamodb)
   .settings(
@@ -40,6 +42,7 @@ lazy val dynamodb = project
 lazy val commonSettings: Seq[Setting[_]] = instrumentSettings ++ Seq(
   ScoverageKeys.highlighting := true,
   libraryDependencies ++= Seq(
+    "com.typesafe.play" %% "play-iteratees" % "2.3.2",
     "org.scalatest" %% "scalatest" % "2.2.0" % "test",
     "org.scalacheck" %% "scalacheck" % "1.11.4" % "test",
     "org.mockito" % "mockito-core" % "1.9.5" % "test"

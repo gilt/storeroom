@@ -1,6 +1,7 @@
 package com.gilt.storeroom
 
 import scala.concurrent._
+import play.api.libs.iteratee.Enumerator
 
 trait Closeable {
   def close(): Future[Unit]
@@ -81,6 +82,5 @@ trait IterableStore[K, V] extends Store[K,V] {
     * Optionally, limit and offset may be specified to page
     * through the entries in the store.
     */
-  // Should perhaps return something like an Enumerator instead
-  def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Future[List[(K,V)]]
+  def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Enumerator[(K,V)]
 }

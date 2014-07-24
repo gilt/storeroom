@@ -10,6 +10,8 @@ import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 
+import play.api.libs.iteratee.{Enumerator, Iteratee}
+
 class ConvertedStoreTest extends FunSuite with Matchers with ScalaFutures with MockitoSugar {
 
   test("gets are converted") {
@@ -69,18 +71,18 @@ class ConvertedStoreTest extends FunSuite with Matchers with ScalaFutures with M
 
   test("getAll is converted") {
     val underlying = mock[IterableStore[Int,Int]]
-    when(underlying.getAll(any(), any())).thenReturn(Future.successful(List(1->2,3->4)))
+    when(underlying.getAll(any(), any())).thenReturn(Enumerator(1->2,3->4))
 
     val store = new ConvertedIterableStore(underlying)(_+1)(_-1)
 
-    store.getAll().futureValue should be(List(1->3,3->5))
+    enumeratorValue(store.getAll()) should be(List(1->3,3->5))
   }
 
   test("failures are propagated") {
     val underlying = mock[IterableStore[Int,Int]]
     when(underlying.get(any())).thenReturn(Future.failed(new MyException()))
     when(underlying.put(any())).thenReturn(Future.failed(new MyException()))
-    when(underlying.getAll(any(), any())).thenReturn(Future.failed(new MyException()))
+    when(underlying.getAll(any(), any())).thenReturn(Enumerator.repeatM(Future.failed[(Int,Int)](new MyException())))
     when(underlying.close()).thenReturn(Future.failed(new MyException()))
 
     val store = new ConvertedIterableStore(underlying)(_+1)(_-1)
@@ -94,7 +96,7 @@ class ConvertedStoreTest extends FunSuite with Matchers with ScalaFutures with M
     }.getCause shouldBe a [MyException]
 
     intercept[TestFailedException] {
-      store.getAll().futureValue
+      enumeratorValue(store.getAll())
     }.getCause shouldBe a [MyException]
 
     intercept[TestFailedException] {
@@ -105,4 +107,5 @@ class ConvertedStoreTest extends FunSuite with Matchers with ScalaFutures with M
 
 
   class MyException extends Exception
+
 }

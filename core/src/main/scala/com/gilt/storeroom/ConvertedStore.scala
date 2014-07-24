@@ -31,9 +31,10 @@ class ConvertedIterableStore[K, V1, V2](s: IterableStore[K, V1])(to: V1 => V2)(f
     extends ConvertedStore[K, V1, V2](s)(to)(from)
     with IterableStore[K, V2]
 {
+  import play.api.libs.iteratee.Enumerator
 
-  override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Future[List[(K,V2)]] =
-    s.getAll(limit, offset).map(_.map(_.map2(to)))
+  override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Enumerator[(K,V2)] =
+    s.getAll(limit, offset).map(_.map2(to))
 }
 
 

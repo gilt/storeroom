@@ -1,8 +1,11 @@
 package com.gilt.storeroom
 
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+
+import play.api.libs.iteratee.Enumerator
 
 /**
   * An in-memory Store implementation.  Generally this should
@@ -24,8 +27,8 @@ class InMemoryStore[K,V] extends IterableStore[K,V] {
     Future.successful(())
   }
 
-  override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Future[List[(K,V)]] = {
-    Future.successful(store.iterator.drop(offset).take(limit).toList)
+  override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Enumerator[(K,V)] = {
+    Enumerator.enumerate(store.iterator.drop(offset).take(limit))
   }
 
 }

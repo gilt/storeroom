@@ -6,7 +6,10 @@ import java.util.{ Map => JMap }
 import java.util.concurrent.Executors
 
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
+
+import play.api.libs.iteratee.{Enumerator, Enumeratee}
 
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDBClient, AmazonDynamoDB }
@@ -60,14 +63,14 @@ class DynamoStore(val client: AmazonDynamoDB, val tableName: String,
         ).asJava
         val putRequest = new PutItemRequest(tableName, attributes)
 
-        Future { client.putItem(putRequest) }
+        Future { blocking(client.putItem(putRequest)) }
       }
 
       case (key, None) => {
         val attributes = Map(primaryKeyColumn -> new AttributeValue(key)).asJava
         val deleteRequest = new DeleteItemRequest(tableName, attributes)
 
-        Future { client.deleteItem(deleteRequest) }
+        Future { blocking(client.deleteItem(deleteRequest)) }
       }
 
     }
@@ -79,39 +82,38 @@ class DynamoStore(val client: AmazonDynamoDB, val tableName: String,
     val getRequest = new GetItemRequest(tableName, attributes)
 
     Future {
-      Option(client.getItem(getRequest).getItem).map(_.get(valueColumn))
+      Option(blocking(client.getItem(getRequest).getItem)).map(_.get(valueColumn))
     }
   }
 
   // TODO - implement multiGet and multiPut
 
-
-  override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Future[List[(String, AttributeValue)]] = {
+  override def getAll(limit: Int = Int.MaxValue, offset: Int = 0): Enumerator[(String, AttributeValue)] = {
     val attributes = List(primaryKeyColumn, valueColumn)
 
-    Future {
-      var needed = offset + limit
-      var scanRequest = new ScanRequest(tableName).withAttributesToGet(attributes.asJava).withLimit(needed)
-      var lastKey: java.util.Map[String, AttributeValue] = null
-      val buffer = collection.mutable.Buffer.empty[(String,AttributeValue)]
+    val initialState: Option[Option[java.util.Map[String, AttributeValue]]] = None
 
-      do {
-        val result = client.scan(scanRequest)
-        buffer ++= result.getItems.asScala.map { kavMap =>
-          (kavMap.get(primaryKeyColumn).getS, kavMap.get(valueColumn))
+    Enumerator.unfoldM(initialState) { state => state match {
+      case Some(None) => Future.successful(None)
+      case _ => {
+        Future {
+          val scanRequest = new ScanRequest(tableName)
+            .withAttributesToGet(attributes.asJava)
+            .withExclusiveStartKey(state.map(_.get).getOrElse(null))
+
+          val result = blocking(client.scan(scanRequest))
+
+          val lastKey = Option(result.getLastEvaluatedKey)
+
+          val items = result.getItems.asScala.map { kavMap =>
+            (kavMap.get(primaryKeyColumn).getS, kavMap.get(valueColumn))
+          }
+
+          Some((Some(lastKey), items))
         }
-
-        needed -= result.getCount
-        lastKey = result.getLastEvaluatedKey
-        scanRequest = scanRequest.withExclusiveStartKey(lastKey).withLimit(needed)
-
-      } while (lastKey != null && needed > 0)
-
-      // still accumulated the unneeded items above, so slice them out now
-      buffer.slice(offset, offset + limit).toList
-    }
+      }
+    }}.flatMap(Enumerator.enumerate).through(Enumeratee.drop(offset)).through(Enumeratee.take(limit))
   }
-
 }
 
 object DynamoStringStore {
