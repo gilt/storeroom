@@ -148,3 +148,22 @@ object DynamoSeqStore {
 
 class DynamoSeqStore(underlying: DynamoStore)
   extends ConvertedIterableStore[String, AttributeValue, Seq[String]](underlying)(_.getSS.asScala)(l => new AttributeValue(l.asJava))
+
+
+object DynamoLongStore {
+
+  def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoLongStore = {
+    val processors = Runtime.getRuntime.availableProcessors
+    this(tableName, primaryKeyColumn, valueColumn, processors)
+  }
+
+  def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoLongStore = {
+    new DynamoLongStore(DynamoStore(tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
+  }
+
+}
+
+class DynamoLongStore(underlying: DynamoStore)
+  extends ConvertedIterableStore[String, AttributeValue, Long](underlying)(_.getN.toLong)(l => (new AttributeValue).withN(l.toString)) {
+  val tableName = underlying.tableName
+}

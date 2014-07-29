@@ -46,4 +46,6 @@ and instantiate with your table details:
         def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStore
     }
 
-This assumes your AWS credentials are available in the environment, as described [here](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient())
+This assumes your AWS credentials are available in the environment, as described [here](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()).
+
+Note that this also holds true when running the dynamodb tests.  They will fail if acceptable credentials aren't available.  Running the tests will cost you money (albeit a very small amount).

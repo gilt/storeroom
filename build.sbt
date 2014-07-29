@@ -29,7 +29,7 @@ lazy val core = project
 
 lazy val dynamodb = project
   .in(file("dynamodb"))
-  .dependsOn(core)
+  .dependsOn(core, core % "test->test")
   .settings(commonSettings: _*)
   .settings(
     name := "storeroom-dynamodb",
