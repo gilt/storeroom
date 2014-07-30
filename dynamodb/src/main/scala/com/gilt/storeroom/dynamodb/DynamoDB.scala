@@ -41,6 +41,30 @@ object DynamoStore {
     */
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoStore = {
     val client = new AmazonDynamoDBClient()
+    this(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads)
+  }
+
+  /**
+    * Create a Store for the specified table, primary key, and value column in Dynamo
+    * using the provided dynamo client
+    *
+    * Asynchronous operations are executed in a thread pool sized according to the
+    * number of available processors
+    *
+    * @see <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()">SDK Javadoc</a>
+    */
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStore = {
+    val processors = Runtime.getRuntime.availableProcessors
+    this(client, tableName, primaryKeyColumn, valueColumn, processors)
+  }
+
+  /**
+    * Create a Store for the specified table, primary key, and value column in Dynamo
+    * using the provided dynamo client
+    *
+    * @see <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()">SDK Javadoc</a>
+    */
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoStore = {
     new DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads)
   }
 
@@ -119,12 +143,19 @@ class DynamoStore(val client: AmazonDynamoDB, val tableName: String,
 object DynamoStringStore {
 
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStringStore = {
-    val processors = Runtime.getRuntime.availableProcessors
-    this(tableName, primaryKeyColumn, valueColumn, processors)
+    new DynamoStringStore(DynamoStore(tableName, primaryKeyColumn, valueColumn))
   }
 
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoStringStore = {
     new DynamoStringStore(DynamoStore(tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
+  }
+
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStringStore = {
+    new DynamoStringStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn))
+  }
+
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoStringStore = {
+    new DynamoStringStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
   }
 
 }
@@ -136,12 +167,19 @@ class DynamoStringStore(underlying: DynamoStore)
 object DynamoSeqStore {
 
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoSeqStore = {
-    val processors = Runtime.getRuntime.availableProcessors
-    this(tableName, primaryKeyColumn, valueColumn, processors)
+    new DynamoSeqStore(DynamoStore(tableName, primaryKeyColumn, valueColumn))
   }
 
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoSeqStore = {
     new DynamoSeqStore(DynamoStore(tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
+  }
+
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoSeqStore = {
+    new DynamoSeqStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn))
+  }
+
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoSeqStore = {
+    new DynamoSeqStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
   }
 
 }
@@ -153,12 +191,19 @@ class DynamoSeqStore(underlying: DynamoStore)
 object DynamoLongStore {
 
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoLongStore = {
-    val processors = Runtime.getRuntime.availableProcessors
-    this(tableName, primaryKeyColumn, valueColumn, processors)
+    new DynamoLongStore(DynamoStore(tableName, primaryKeyColumn, valueColumn))
   }
 
   def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoLongStore = {
     new DynamoLongStore(DynamoStore(tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
+  }
+
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoLongStore = {
+    new DynamoLongStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn))
+  }
+
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoLongStore = {
+    new DynamoLongStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
   }
 
 }

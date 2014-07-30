@@ -43,9 +43,9 @@ To use the DynamoDB implementation, add to your dependencies:
 and instantiate with your table details:
 
     object DynamoStore {
-        def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStore
+        def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoStore
     }
 
-This assumes your AWS credentials are available in the environment, as described [here](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()).
+If your AWS credentials are available in the environment, as described [here](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/dynamodbv2/AmazonDynamoDBClient.html#AmazonDynamoDBClient()), you may omit `client`.
 
-Note that this also holds true when running the dynamodb tests.  They will fail if acceptable credentials aren't available.  Running the tests will cost you money (albeit a very small amount).
+Note that when running the dynamodb tests, your credentials must be provided by your environment.  The test will fail if acceptable credentials aren't available.  Running the tests will cost you money (albeit a very small amount).
