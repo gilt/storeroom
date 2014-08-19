@@ -8,7 +8,7 @@ crossScalaVersions := Seq("2.10.4", "2.11.1")
 
 scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked", "-feature")
 
-version in ThisBuild := "0.0.2"
+version in ThisBuild := "0.0.3"
 
 homepage in ThisBuild := Some(url("http://github.com/gilt/storeroom"))
 
