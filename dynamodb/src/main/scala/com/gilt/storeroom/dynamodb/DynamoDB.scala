@@ -164,28 +164,28 @@ class DynamoStringStore(underlying: DynamoStore)
   extends ConvertedIterableStore[String, AttributeValue, String](underlying)(_.getS)(new AttributeValue(_))
 
 
-object DynamoSeqStore {
+object DynamoSetStore {
 
-  def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoSeqStore = {
-    new DynamoSeqStore(DynamoStore(tableName, primaryKeyColumn, valueColumn))
+  def apply(tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoSetStore = {
+    new DynamoSetStore(DynamoStore(tableName, primaryKeyColumn, valueColumn))
   }
 
-  def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoSeqStore = {
-    new DynamoSeqStore(DynamoStore(tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
+  def apply(tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoSetStore = {
+    new DynamoSetStore(DynamoStore(tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
   }
 
-  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoSeqStore = {
-    new DynamoSeqStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn))
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String): DynamoSetStore = {
+    new DynamoSetStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn))
   }
 
-  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoSeqStore = {
-    new DynamoSeqStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
+  def apply(client: AmazonDynamoDBClient, tableName: String, primaryKeyColumn: String, valueColumn: String, numberWorkerThreads: Int): DynamoSetStore = {
+    new DynamoSetStore(DynamoStore(client, tableName, primaryKeyColumn, valueColumn, numberWorkerThreads))
   }
 
 }
 
-class DynamoSeqStore(underlying: DynamoStore)
-  extends ConvertedIterableStore[String, AttributeValue, Seq[String]](underlying)(_.getSS.asScala)(l => new AttributeValue(l.asJava))
+class DynamoSetStore(underlying: DynamoStore)
+  extends ConvertedIterableStore[String, AttributeValue, Set[String]](underlying)(_.getSS.asScala.toSet)(l => new AttributeValue(l.toSeq.asJava))
 
 
 object DynamoLongStore {
